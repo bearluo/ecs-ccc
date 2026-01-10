@@ -1,0 +1,28 @@
+{
+  "name": "ecs-ccc",
+  "uuid": "54003138-dc96-4ec4-8424-c37b17344eb2",
+  "creator": {
+    "version": "3.8.7"
+  },
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand --no-cache"
+  },
+  "dependencies": {
+    "@bl-framework/core": "^1.0.0",
+    "@bl-framework/ecs": "^1.0.0",
+    "@bl-framework/behaviortree": "^1.0.0",
+    "@bl-framework/behaviortree-ecs": "^1.0.0",
+    "@bl-framework/mvvm": "^1.0.0",
+    "@bl-framework/mvvm-creator": "^1.0.0",
+    "@bl-framework/fsm": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
+    "typescript": "^5.9.3"
+  }
+}
