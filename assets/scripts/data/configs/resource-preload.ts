@@ -11,18 +11,18 @@ import { PreloadConfig } from '../../presentation/ResourcePreloader';
  */
 export const StartupPreloadConfig: PreloadConfig = {
     prefabs: [
-        'prefabs/player',
-        'prefabs/enemy-basic',
-        'prefabs/enemy-elite',
-        'prefabs/projectile',
-        'prefabs/item-health',
-        'prefabs/item-power'
+        // 'prefabs/player',
+        // 'prefabs/enemy-basic',
+        // 'prefabs/enemy-elite',
+        // 'prefabs/projectile',
+        // 'prefabs/item-health',
+        // 'prefabs/item-power'
     ],
     audios: [
-        'audio/bgm-main',
-        'audio/sfx/hit',
-        'audio/sfx/explosion',
-        'audio/sfx/pickup'
+        // 'audio/bgm-main',
+        // 'audio/sfx/hit',
+        // 'audio/sfx/explosion',
+        // 'audio/sfx/pickup'
     ]
 };
 

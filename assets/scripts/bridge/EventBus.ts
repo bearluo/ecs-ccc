@@ -7,6 +7,7 @@
 
 import { Handle } from '@bl-framework/ecs';
 import type { EquipmentSlotType } from '../data/configs/equipment';
+import { SceneType } from '../app/SceneContext';
 /**
  * 游戏事件类型
  * 
@@ -19,7 +20,7 @@ export type GameplayEvent =
     | { type: 'ViewEvent'; eventName: 'ViewSpawned' | 'ViewSpawnFailed'; entityId: number }
     | { type: 'LevelUp'; handle: Handle; oldLevel: number; newLevel: number; levelsGained: number }
     | { type: 'EquipmentChange'; handle: Handle; slotType: EquipmentSlotType; equipmentId: string; action: 'equip' | 'unequip' }
-    | { type: 'EntityDeath'; handle: Handle; killerHandle?: Handle };
+    | { type: 'EntityDeath'; handle: Handle; killerHandle?: Handle }
 
 /**
  * 事件处理器类型

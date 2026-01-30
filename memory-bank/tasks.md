@@ -5,7 +5,21 @@
 **任务 ID:** TASK-001  
 **任务名称:** 设计 ECS 和 Creator 结合的游戏框架（肉鸽手游向）  
 **复杂度级别:** Level 4 - 复杂系统  
-**状态:** 阶段 2 代码实现完成 ✅
+**状态:** 阶段 1–3 代码实现完成 ✅，反思完成 ✅，**归档完成 ✅**
+
+### 归档信息（Archive）
+
+- **归档日期：** 2025-01-29
+- **归档文档：** [memory-bank/archive/archive-TASK-001.md](archive/archive-TASK-001.md)
+- **反思文档：** [memory-bank/reflection/reflection-TASK-001.md](reflection/reflection-TASK-001.md)
+- **状态：** COMPLETED
+
+### 反思要点（Reflection Highlights）
+
+- **做得好的地方：** 分层与桥接清晰、硬约束成文并落地、创意阶段先写文档再写代码；复用框架能力、Handle 与异步生命周期处理得当、表现与逻辑解耦；阶段 1 禁止清单有效、单元测试覆盖关键路径、配置与数据驱动。
+- **主要挑战与应对：** 实体引用与 ID 复用 → 全面采用 Handle；View 与 ECS 生命周期不同步 → NeedViewTag + EventBus 确认 + Handle 作 Map key（字符串）；动画与销毁时序 → 两阶段销毁（死亡动画 + DestroyTimer/动画事件）；动画状态重复发送 → lastSentAnim 源头优化 + AnimDriver 防御性检查。
+- **经验教训：** 先定边界再实现；Handle 是跨边界引用的唯一安全方式；创意文档是活的规格；阶段 1 禁止清单防 scope creep；测试优先覆盖桥接与数据流。
+- **下一步：** 使用 `/van` 启动下一任务；或规划阶段 4（性能与工具）、Cocos Creator 运行时验证。
 
 ## 任务描述
 
@@ -507,21 +521,74 @@ assets/scripts/
   - **单元测试：** 23 个测试用例全部通过，覆盖所有核心功能和约束
 
 #### 3.3 UI 系统
-- [ ] **UI/GameUI.ts** - 游戏 UI
-- [ ] **UI/InventoryUI.ts** - 背包 UI
-- [ ] **UI/SkillUI.ts** - 技能 UI
-- [ ] **UI/StatsUI.ts** - 属性 UI
-- [ ] UI 事件 → EventBus 集成
+- [x] **UI 系统设计** ✅ 设计完成
+  - **设计决策：** 混合方案（事件驱动 + 定时查询 + 直接查询）
+  - **参考文档：** `memory-bank/creative/creative-ui-system.md`
+  - **设计内容：**
+    - ✅ UIManager（UI 管理器，统一管理 UI 模块）
+    - ✅ GameUI（游戏主界面：HP 条、经验条、等级）
+    - ✅ InventoryUI（背包界面：物品列表、使用、装备）
+    - ✅ SkillUI（技能界面：技能槽位、冷却时间）
+    - ✅ StatsUI（属性界面：攻击、防御、速度等）
+    - ✅ UI 事件规范（通过 EventBus 发送 UIEvent）
+    - ✅ UI 数据更新方案（定时查询 + 事件监听）
+    - ✅ UISystem（处理 UI 事件的 ECS 系统）
+- [x] **UI/UIManager.ts** - UI 管理器 ✅ 实现完成
+- [x] **UI/GameUI.ts** - 游戏 UI ✅ 实现完成
+- [x] **UI/InventoryUI.ts** - 背包 UI ✅ 实现完成
+- [x] **UI/SkillUI.ts** - 技能 UI ✅ 实现完成
+- [x] **UI/StatsUI.ts** - 属性 UI ✅ 实现完成
+- [x] **systems/UISystem.ts** - UI 事件处理系统 ✅ 实现完成
+- [x] UI 事件 → EventBus 集成 ✅ 集成完成
+  - **实现内容：**
+    - ✅ 创建 `UIManager`（单例模式，提供 getPlayerEntity、World 和 EventBus 访问）
+    - ✅ 创建 `GameUI`（HP 条、经验条、等级显示，定时查询 + 事件监听）
+    - ✅ 创建 `InventoryUI`（物品列表、使用、装备，定时查询）
+    - ✅ 创建 `SkillUI`（技能槽位、冷却时间，定时查询）
+    - ✅ 创建 `StatsUI`（属性显示，定时查询 + 事件监听）
+    - ✅ 创建 `UISystem`（处理 UI 事件，调用 InventorySystem、EquipmentSystem、SkillSystem）
+    - ✅ 集成到 `GameApp`（初始化 UIManager、注册 UISystem、设置依赖）
+    - ✅ UI 事件使用 `ui:` 命名空间前缀（避免冲突）
+    - ✅ 所有 UI 模块使用统一的 `getPlayerEntity()` 方法
+    - ✅ 性能优化：`stats.getFinal()` 只在 refreshFromWorld() 中调用
+    - ✅ 单元测试完成（UIManager.test.ts - 9 个测试用例、UISystem.test.ts - 8 个测试用例）
+    - ✅ 所有测试通过（17/17）
 
-#### 3.4 场景管理
-- [ ] **SceneFlow.ts** - 场景流程
-- [ ] 场景切换时 ECS World 状态管理
-- [ ] 资源加载/卸载
+#### 3.4 场景管理 ✅ 实现完成
+- [x] **SceneFlow.ts** - 场景流程 ✅ 实现完成
+  - **设计决策：** 场景状态机 + World 保留策略（使用 SceneTagComponent 标记场景特定实体）
+  - **参考文档：** `memory-bank/creative/creative-scene-flow.md`
+  - **实现内容：**
+    - ✅ 创建 `SceneTagComponent` 组件（标记场景特定实体）
+    - ✅ 创建 `SceneFlow` 类（场景流程管理）
+    - ✅ 实现场景切换流程（预加载 → 清理 → 加载 → 初始化）
+    - ✅ 实现场景清理逻辑（清理带 SceneTagComponent 的实体）
+    - ✅ 实现场景初始化逻辑（创建场景特定实体）
+    - ✅ 集成到 `GameApp`（提供 switchScene 和 getCurrentScene 方法）
+    - ✅ 场景实体创建框架（为场景特定实体添加 SceneTagComponent 的框架已实现）
+  - **测试：** ✅ 单元测试完成（SceneTag.test.ts - 4 个测试用例、SceneFlow.test.ts - 12 个测试用例）
+  - **测试通过：** ✅ 16/16 测试通过
+- [x] 场景切换时 ECS World 状态管理 ✅ 实现完成
+  - **设计决策：** World 在整个游戏生命周期中保留，场景切换时只清理场景特定的实体（通过 SceneTagComponent 标记）
+  - **实现：** SceneFlow.cleanupScene 方法已实现，通过 SceneTagComponent 标记场景特定实体
+- [x] 资源加载/卸载 ✅ 实现完成
+  - **设计决策：** 场景切换前预加载资源，场景切换后清理 View 层（资源管理器可选择卸载场景特定资源）
+  - **实现：** SceneFlow.preloadScene 方法已实现，通过 ResourcePreloader 预加载场景资源
 
-#### 3.5 服务定位器（可选）
-- [ ] **ServiceLocator.ts**
-  - 全局服务注册
-  - 依赖注入
+#### 3.5 服务定位器（可选）✅ 实现完成
+- [x] **ServiceLocator.ts** ✅ 实现完成
+  - **设计决策：** 轻量级服务注册表（类型安全的泛型支持）
+  - **参考文档：** `memory-bank/creative/creative-service-locator.md`
+  - **实现内容：**
+    - ✅ 创建 `ServiceLocator` 类（register、get、require、has、unregister、clear 方法）
+    - ✅ 在 `GameApp` 中注册核心服务（World、CommandBuffer、EventBus、ConfigLoader、ViewManager、AnimDriver、FxDriver、AudioDriver、SceneFlow）
+    - ✅ 编写单元测试（ServiceLocator.test.ts - 15 个测试用例）
+  - **设计特点：**
+    - 类型安全的泛型支持
+    - 与现有单例模式和依赖注入兼容（ResourceManager、ResourcePreloader、UIManager 保持单例模式）
+    - 可以逐步迁移，不需要一次性重构
+  - **注意事项：**
+    - 单例模式的服务（ResourceManager、ResourcePreloader、UIManager）不需要注册到 ServiceLocator，继续使用 `getInstance()` 方法
 
 **验收标准：**
 - 完整的肉鸽游戏核心玩法

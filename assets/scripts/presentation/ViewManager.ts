@@ -15,8 +15,8 @@ import { AnimDriver } from './AnimDriver';
 import { FxDriver } from './FxDriver';
 import { AudioDriver } from './AudioDriver';
 import { AnimStateComponent } from '../gameplay/components/AnimState';
-import { ViewLinkComponent } from '../gameplay/components/ViewLink';
 import { ResourceManager } from './ResourceManager';
+import { ServiceLocator } from '../app/ServiceLocator';
 
 /**
  * 视图管理器
@@ -30,12 +30,6 @@ export class ViewManager {
 
     /** Node → Handle 映射（反向查找，直接存储 Handle 对象） */
     private nodeHandleMap: Map<Node, Handle> = new Map();
-
-    /** EntityId → Node 映射（保留，用于 ViewPool） */
-    private entityNodeMap: Map<number, Node> = new Map();
-
-    /** 资源管理器 */
-    private resourceManager: ResourceManager;
 
     /** 视图对象池 */
     private viewPool: ViewPool;
@@ -61,18 +55,9 @@ export class ViewManager {
     /** World 引用（用于查询实体） */
     private world?: any; // @bl-framework/ecs World
 
-    constructor(resourceManager?: ResourceManager) {
-        this.resourceManager = resourceManager || new ResourceManager();
-        this.viewPool = new ViewPool(20, this.resourceManager); // 默认池大小 20
+    constructor() {
+        this.viewPool = new ViewPool(20); // 默认池大小 20
         this.nodeBinder = new NodeBinder();
-    }
-
-    /**
-     * 设置资源管理器（依赖注入）
-     */
-    setResourceManager(resourceManager: ResourceManager): void {
-        this.resourceManager = resourceManager;
-        this.viewPool.setResourceManager(resourceManager);
     }
 
     /**
@@ -240,7 +225,6 @@ export class ViewManager {
         // 记录映射
         this.handleNodeMap.set(handleKey, node);
         this.nodeHandleMap.set(node, handle); // 直接存储 Handle 对象
-        this.entityNodeMap.set(entityId, node); // 保留用于 ViewPool
         
         // 绑定节点（使用 Handle）
         this.nodeBinder.bind(node, handle);
@@ -327,19 +311,10 @@ export class ViewManager {
     /**
      * 销毁视图
      */
-    private destroyView(handle: Handle): void {
+    public destroyView(handle: Handle): void {
         const handleKey = this.handleToKey(handle);
         const node = this.handleNodeMap.get(handleKey);
         if (!node) return;
-
-        // 获取 entityId（用于 ViewPool）
-        let entityId: number | undefined;
-        if (this.world && this.world.isValidHandle(handle)) {
-            const entity = this.world.getEntityByHandle(handle);
-            if (entity) {
-                entityId = entity.id;
-            }
-        }
 
         // 从场景移除
         if (node.parent) {
@@ -349,14 +324,11 @@ export class ViewManager {
         // 移除映射
         this.handleNodeMap.delete(handleKey);
         this.nodeHandleMap.delete(node);
-        if (entityId) {
-            this.entityNodeMap.delete(entityId);
-        }
 
         // 解绑节点
         this.nodeBinder.unbind(node);
 
-        // 回收到对象池（直接传递 node，不传递 entityId）
+        // 回收到对象池（直接传递 node）
         this.viewPool.release(node);
     }
 
@@ -373,13 +345,6 @@ export class ViewManager {
      */
     getHandleByNode(node: Node): Handle | undefined {
         return this.nodeHandleMap.get(node);
-    }
-
-    /**
-     * 获取 EntityId 对应的 Node（保留，用于向后兼容）
-     */
-    getNode(entityId: number): Node | undefined {
-        return this.entityNodeMap.get(entityId);
     }
 
     /**
@@ -402,7 +367,6 @@ export class ViewManager {
         
         this.handleNodeMap.clear();
         this.nodeHandleMap.clear();
-        this.entityNodeMap.clear();
         this.nodeBinder.clear();
         this.viewPool.clear();
     }

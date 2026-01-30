@@ -10,6 +10,7 @@
  * 参考文档：memory-bank/creative/creative-resource-loading-flow.md
  */
 
+import { ServiceLocator } from '../app/ServiceLocator';
 import { ResourceManager } from './ResourceManager';
 
 /**
@@ -30,8 +31,8 @@ export class ResourcePreloader {
     private loadingStatus: 'idle' | 'loading' | 'complete' | 'error' = 'idle';
     private loadingErrors: string[] = [];
 
-    constructor(resourceManager: ResourceManager) {
-        this.resourceManager = resourceManager;
+    constructor() {
+        this.resourceManager = ServiceLocator.require(ResourceManager);
     }
 
     /**

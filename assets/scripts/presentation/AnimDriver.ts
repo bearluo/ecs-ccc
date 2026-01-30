@@ -128,7 +128,41 @@ export class AnimDriver {
             this.animInfoMap.delete(node);
         }
     }
+    /**
+     * 暂停动画
+     */
+    pauseAnim(node: Node): void {
+        const animation = this.nodeAnimMap.get(node);
+        if (animation) {
+            animation.pause();
+        }
+    }
+    /**
+     * 暂停所有动画
+     */
+    pauseAllAnim(): void {
+        for (const animation of this.nodeAnimMap.values()) {
+            animation.pause();
+        }
+    }
 
+    /**
+     * 恢复动画
+     */
+    resumeAnim(node: Node): void {
+        const animation = this.nodeAnimMap.get(node);
+        if (animation) {
+            animation.resume();
+        }
+    }
+    /**
+     * 恢复所有动画
+     */
+    resumeAllAnim(): void {
+        for (const animation of this.nodeAnimMap.values()) {
+            animation.resume();
+        }
+    }
     /**
      * 动画完成回调
      */

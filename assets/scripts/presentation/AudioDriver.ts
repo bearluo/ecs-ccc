@@ -218,4 +218,17 @@ export class AudioDriver {
         
         this.currentBGMKey = undefined;
     }
+
+    /**
+     * 暂停所有音频
+     * TODO: 实现
+     */
+    pauseAllAudio(): void {
+    }
+    /**
+     * 恢复所有音频
+     * TODO: 实现
+     */
+    resumeAllAudio(): void {
+    }
 }

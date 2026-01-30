@@ -76,6 +76,7 @@ import { AnimationIntentSystem } from '../../scripts/gameplay/systems/AnimationI
 import { AnimationEventSystem } from '../../scripts/gameplay/systems/AnimationEventSystem';
 import { ViewSpawnSystem } from '../../scripts/gameplay/systems/ViewSpawnSystem';
 import { SaveSystem } from '../../scripts/gameplay/systems/SaveSystem';
+import { ServiceLocator } from '../../scripts/app/ServiceLocator';
 
 const { ccclass, property } = _decorator;
 
@@ -133,9 +134,11 @@ export class SceneTestGame extends Component {
 
         // 初始化资源管理器
         this.resourceManager = new ResourceManager();
+        ServiceLocator.register(ResourceManager, this.resourceManager);
         
         // 初始化资源预加载器
-        this.resourcePreloader = new ResourcePreloader(this.resourceManager);
+        this.resourcePreloader = new ResourcePreloader();
+        ServiceLocator.register(ResourcePreloader, this.resourcePreloader);
 
         // 初始化配置系统（必须在 Driver 初始化之前）
         this.configLoader = new ConfigLoader();
@@ -145,7 +148,8 @@ export class SceneTestGame extends Component {
         this.saveSystem.setConfigLoader(this.configLoader);
         
         // 初始化表现层
-        this.viewManager = new ViewManager(this.resourceManager);
+        this.viewManager = new ViewManager();
+        ServiceLocator.register(ViewManager, this.viewManager);
         this.viewManager.setEventBus(this.eventBus); // 设置 EventBus，用于发送视图创建确认事件
         this.viewManager.setWorld(this.world); // 设置 World，用于查询实体
         this.viewManager.setViewParent(this.viewParent); // 设置视图父节点

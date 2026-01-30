@@ -29,3 +29,4 @@ export { EquipmentComponent } from './Equipment';
 export type { EquipmentData } from './Equipment';
 export { InventoryComponent } from './Inventory';
 export type { InventoryItem } from './Inventory';
+export { SceneTagComponent } from './SceneTag';

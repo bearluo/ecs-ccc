@@ -82,7 +82,15 @@ export class EquipmentComponent extends Component {
      * @returns 装备数据数组
      */
     getAllEquipped(): EquipmentData[] {
-        return Object.values(this.slots).filter(slot => slot !== null) as EquipmentData[];
+        const result: EquipmentData[] = [];
+        const keys = Object.keys(this.slots);
+        for (let i = 0; i < keys.length; i++) {
+            const slot = this.slots[keys[i]];
+            if (slot !== null) {
+                result.push(slot);
+            }
+        }
+        return result;
     }
 
     /**

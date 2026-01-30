@@ -184,4 +184,29 @@ export class FxDriver {
         this.fxPools.clear();
         this.activeFxNodes.clear();
     }
+
+    /**
+     * 暂停所有特效
+     * TODO: 实现
+     */
+    pauseAllFx(): void {
+    }
+    /**
+     * 恢复所有特效
+     * TODO: 实现
+     */
+    resumeAllFx(): void {
+    }
+    /**
+     * 暂停特效
+     * TODO: 实现
+     */
+    pauseFx(node: Node): void {
+    }
+    /**
+     * 恢复特效
+     * TODO: 实现
+     */
+    resumeFx(node: Node): void {
+    }
 }

@@ -13,7 +13,7 @@
  * 2. DestroyTimer 到期：超时保护
  */
 
-import { System, system, Handle } from '@bl-framework/ecs';
+import { System, system, Handle, Entity } from '@bl-framework/ecs';
 import { DeadTagComponent } from '../components/DeadTag';
 import { DestroyTimerComponent } from '../components/DestroyTimer';
 import { CommandBuffer } from '../../bridge/CommandBuffer';
@@ -87,12 +87,7 @@ export class DestroySystem extends System {
      * 销毁实体
      * ⚠️ 关键：使用 Handle 而不是 entityId
      */
-    private destroyEntity(entity: any): void {
-        // 检查实体是否有效
-        if (!this.world.isValidHandle(entity.handle)) {
-            return;
-        }
-
+    private destroyEntity(entity: Entity): void {
         // 检查是否有 DeadTag（必须是死亡实体）
         if (!entity.hasComponent(DeadTagComponent)) {
             return;

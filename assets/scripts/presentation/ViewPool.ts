@@ -9,6 +9,7 @@
 
 import { Node, Prefab, instantiate } from 'cc';
 import { ResourceManager } from './ResourceManager';
+import { ServiceLocator } from '../app/ServiceLocator';
 
 /**
  * 节点池（单个类型）
@@ -17,13 +18,11 @@ class NodePool {
     private pool: Node[] = [];
     private maxSize: number;
     private prefabKey: string;
-    private resourceManager?: ResourceManager;
     private prefab?: Prefab;
 
-    constructor(prefabKey: string, maxSize: number, resourceManager?: ResourceManager) {
+    constructor(prefabKey: string, maxSize: number) {
         this.prefabKey = prefabKey;
         this.maxSize = maxSize;
-        this.resourceManager = resourceManager;
     }
 
     /**
@@ -75,11 +74,6 @@ class NodePool {
      * ⚠️ 架构约束：如果 Prefab 未加载，返回 null（不创建临时 Node）
      */
     private createNode(): Node | null {
-        // 如果没有 ResourceManager，返回 null
-        if (!this.resourceManager) {
-            return null;
-        }
-
         // 如果 Prefab 已加载，直接实例化
         if (this.prefab) {
             const node = instantiate(this.prefab);
@@ -137,23 +131,15 @@ export class ViewPool {
     private defaultMaxSize: number = 20;
 
     /** 资源管理器 */
-    private resourceManager?: ResourceManager;
+    private resourceManager: ResourceManager;
 
     /**
      * 构造函数
      * @param defaultMaxSize 默认池大小（每个类型）
-     * @param resourceManager 资源管理器（可选）
      */
-    constructor(defaultMaxSize: number = 20, resourceManager?: ResourceManager) {
+    constructor(defaultMaxSize: number = 20) {
         this.defaultMaxSize = defaultMaxSize;
-        this.resourceManager = resourceManager;
-    }
-
-    /**
-     * 设置资源管理器
-     */
-    setResourceManager(resourceManager: ResourceManager): void {
-        this.resourceManager = resourceManager;
+        this.resourceManager = ServiceLocator.require(ResourceManager);
     }
 
     /**
@@ -166,7 +152,7 @@ export class ViewPool {
     get(prefabKey: string, ownerKey?: string): Node | null {
         let pool = this.pools.get(prefabKey);
         if (!pool) {
-            pool = new NodePool(prefabKey, this.defaultMaxSize, this.resourceManager);
+            pool = new NodePool(prefabKey, this.defaultMaxSize);
             this.pools.set(prefabKey, pool);
         }
 
@@ -201,23 +187,17 @@ export class ViewPool {
      * @param path 资源路径（相对于 resources 目录）
      */
     async preloadPrefab(prefabKey: string, path: string): Promise<void> {
-        if (!this.resourceManager) {
-            console.warn(`[ViewPool] ResourceManager not set, cannot preload ${prefabKey}`);
-            return;
-        }
-
         try {
             // 调用 ResourceManager 加载（ResourceManager 处理缓存和去重）
             const prefab = await this.resourceManager.loadPrefab(path);
             let pool = this.pools.get(prefabKey);
             if (!pool) {
-                pool = new NodePool(prefabKey, this.defaultMaxSize, this.resourceManager);
+                pool = new NodePool(prefabKey, this.defaultMaxSize);
                 this.pools.set(prefabKey, pool);
             }
             pool.setPrefab(prefab);
         } catch (error) {
             console.error(`[ViewPool] Failed to preload prefab: ${prefabKey} from ${path}`, error);
-            // 错误由 ResourceManager 处理，ViewPool 不关心
         }
     }
 
@@ -292,7 +272,7 @@ export class ViewPool {
     setMaxSize(prefabKey: string, maxSize: number): void {
         let pool = this.pools.get(prefabKey);
         if (!pool) {
-            pool = new NodePool(prefabKey, maxSize, this.resourceManager);
+            pool = new NodePool(prefabKey, maxSize);
             this.pools.set(prefabKey, pool);
         } else {
             // 如果新的大小小于当前池大小，需要清理多余的节点

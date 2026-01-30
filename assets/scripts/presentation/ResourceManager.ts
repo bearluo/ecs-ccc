@@ -8,7 +8,7 @@
  * 参考文档：memory-bank/creative/creative-resource-manager.md
  */
 
-import { Prefab, Texture2D, AudioClip, resources, Asset } from 'cc';
+import { Prefab, Texture2D, AudioClip, resources, Asset, SpriteFrame } from 'cc';
 
 /**
  * 资源管理器
@@ -219,5 +219,13 @@ export class ResourceManager {
                 }
             });
         });
+    }
+
+    getTexture(path: string): Texture2D | null {
+        // 1. 检查缓存
+        if (this.textureCache.has(path)) {
+            return this.textureCache.get(path)!;
+        }
+        return null;
     }
 }
