@@ -3,7 +3,8 @@
  * SceneTagComponent 单元测试
  */
 
-import { SceneTagComponent, SceneType } from 'db://assets/scripts/gameplay/components/SceneTag';
+import { SceneTagComponent } from 'db://assets/scripts/gameplay/components/SceneTag';
+import { SceneType } from 'db://assets/scripts/app/SceneContext';
 
 describe('SceneTagComponent', () => {
     let component: SceneTagComponent;
@@ -14,7 +15,7 @@ describe('SceneTagComponent', () => {
 
     describe('初始化', () => {
         it('应该有默认值', () => {
-            expect(component.sceneType).toBe(SceneType.Main);
+            expect(component.sceneType).toBe('');
         });
     });
 
@@ -24,7 +25,7 @@ describe('SceneTagComponent', () => {
 
             component.reset();
 
-            expect(component.sceneType).toBe(SceneType.Main);
+            expect(component.sceneType).toBe('');
         });
     });
 

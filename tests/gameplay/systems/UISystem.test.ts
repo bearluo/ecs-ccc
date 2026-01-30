@@ -13,6 +13,7 @@ import { InventoryComponent } from '../../../assets/scripts/gameplay/components/
 import { SkillSlotsComponent } from '../../../assets/scripts/gameplay/components/SkillSlots';
 import { AnimationIntentComponent } from '../../../assets/scripts/gameplay/components/AnimationIntent';
 import { ConfigLoader } from '../../../assets/scripts/ConfigLoader';
+import { ServiceLocator } from 'db://assets/scripts/app/ServiceLocator';
 
 describe('UISystem', () => {
     let world: World;
@@ -25,10 +26,12 @@ describe('UISystem', () => {
     let player: Entity;
 
     beforeEach(() => {
+        ServiceLocator.clear();
         world = new World({ debug: false });
         eventBus = new EventBus();
         configLoader = new ConfigLoader();
-        uiManager = UIManager.getInstance();
+        uiManager = new UIManager();
+        ServiceLocator.register(UIManager, uiManager);
         uiManager.setWorld(world);
         uiManager.setEventBus(eventBus);
 

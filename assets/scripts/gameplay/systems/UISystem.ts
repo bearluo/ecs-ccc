@@ -20,6 +20,7 @@ import { SkillSlotsComponent } from '../components/SkillSlots';
 import { InventoryComponent } from '../components/Inventory';
 import { EquipmentSlotType } from '../../data/configs/equipment';
 import { UIManager } from '../../presentation/UI/UIManager';
+import { ServiceLocator } from '../../app/ServiceLocator';
 
 /**
  * UI 事件类型
@@ -157,7 +158,7 @@ export class UISystem extends System {
      * 处理打开背包事件
      */
     private handleOpenInventory(): void {
-        const uiManager = UIManager.getInstance();
+        const uiManager = ServiceLocator.require(UIManager);
         const inventoryUI = uiManager.getUI('InventoryUI');
         if (inventoryUI && typeof (inventoryUI as any).show === 'function') {
             (inventoryUI as any).show();
@@ -168,7 +169,7 @@ export class UISystem extends System {
      * 处理关闭背包事件
      */
     private handleCloseInventory(): void {
-        const uiManager = UIManager.getInstance();
+        const uiManager = ServiceLocator.require(UIManager);
         const inventoryUI = uiManager.getUI('InventoryUI');
         if (inventoryUI && typeof (inventoryUI as any).hide === 'function') {
             (inventoryUI as any).hide();
@@ -179,7 +180,7 @@ export class UISystem extends System {
      * 处理打开技能面板事件
      */
     private handleOpenSkillPanel(): void {
-        const uiManager = UIManager.getInstance();
+        const uiManager = ServiceLocator.require(UIManager);
         const skillUI = uiManager.getUI('SkillUI');
         if (skillUI && typeof (skillUI as any).show === 'function') {
             (skillUI as any).show();
@@ -190,7 +191,7 @@ export class UISystem extends System {
      * 处理打开属性面板事件
      */
     private handleOpenStatsPanel(): void {
-        const uiManager = UIManager.getInstance();
+        const uiManager = ServiceLocator.require(UIManager);
         const statsUI = uiManager.getUI('StatsUI');
         if (statsUI && typeof (statsUI as any).show === 'function') {
             (statsUI as any).show();
@@ -201,7 +202,7 @@ export class UISystem extends System {
      * 查找玩家实体（使用 UIManager 的统一方法）
      */
     private findPlayerEntity(): Entity | null {
-        const uiManager = UIManager.getInstance();
+        const uiManager = ServiceLocator.require(UIManager);
         const world = uiManager.getWorld();
         if (!world) return null;
         return uiManager.getPlayerEntity(world);

@@ -77,6 +77,7 @@ export class SceneFlow {
         this.world = world;
         this.gameApp = gameApp;
         this.commandBuffer = ServiceLocator.require(CommandBuffer);
+        this.sceneTagQuery = this.world.createQuery({ all: [SceneTagComponent] });
     }
 
     /**

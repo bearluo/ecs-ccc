@@ -9,7 +9,7 @@
  */
 
 import { SceneFlow, SceneSwitchOptions } from 'db://assets/scripts/app/SceneFlow';
-import { SceneType, SceneTagComponent } from 'db://assets/scripts/gameplay/components/SceneTag';
+import { SceneTagComponent } from 'db://assets/scripts/gameplay/components/SceneTag';
 import { World } from '@bl-framework/ecs';
 import { ResourceManager } from 'db://assets/scripts/presentation/ResourceManager';
 import { ResourcePreloader } from 'db://assets/scripts/presentation/ResourcePreloader';
@@ -18,6 +18,8 @@ import { GameApp } from 'db://assets/scripts/app/GameApp';
 import { director } from 'cc';
 import { TransformComponent } from 'db://assets/scripts/gameplay/components/Transform';
 import { ServiceLocator } from 'db://assets/scripts/app/ServiceLocator';
+import { SceneType } from 'db://assets/scripts/app/SceneContext';
+import { CommandBuffer } from 'db://assets/scripts/bridge/CommandBuffer';
 
 describe('SceneFlow', () => {
     let sceneFlow: SceneFlow;
@@ -29,24 +31,27 @@ describe('SceneFlow', () => {
     const mockDirector = director as any;
 
     beforeEach(() => {
+        ServiceLocator.clear();
         world = new World({
             debug: false,
             initialEntityPoolSize: 100,
             componentPoolSize: 50
         });
+        const commandBuffer = new CommandBuffer();
+        ServiceLocator.register(CommandBuffer, commandBuffer);
         resourceManager = new ResourceManager();
         ServiceLocator.register(ResourceManager, resourceManager);
         resourcePreloader = new ResourcePreloader();
         ServiceLocator.register(ResourcePreloader, resourcePreloader);
         viewManager = new ViewManager();
         ServiceLocator.register(ViewManager, viewManager);
-        mockGameApp = {} as GameApp;
+        mockGameApp = {
+            resume: jest.fn(),
+            pause: jest.fn()
+        } as unknown as GameApp;
 
         sceneFlow = new SceneFlow(
             world,
-            resourceManager,
-            resourcePreloader,
-            viewManager,
             mockGameApp
         );
 
@@ -71,28 +76,6 @@ describe('SceneFlow', () => {
         });
     });
 
-    describe('cleanupScene', () => {
-        it('应该通过 switchScene 清理场景（验证 ViewManager.clear 被调用）', async () => {
-            // Mock director.loadScene
-            mockDirector.loadScene = jest.fn((sceneName: string, callback: (error: Error | null) => void) => {
-                Promise.resolve().then(() => {
-                    callback(null);
-                });
-            });
-
-            // Mock resourcePreloader.preloadParallel
-            jest.spyOn(resourcePreloader, 'preloadParallel').mockResolvedValue(undefined);
-
-            // Mock viewManager.clear
-            const clearSpy = jest.spyOn(viewManager, 'clear').mockImplementation(() => {});
-
-            // 切换场景时应该调用 viewManager.clear
-            await sceneFlow.switchScene(SceneType.Battle, { cleanup: true });
-
-            expect(clearSpy).toHaveBeenCalled();
-        });
-    });
-
     describe('switchScene', () => {
         beforeEach(() => {
             // Mock director.loadScene
@@ -105,8 +88,6 @@ describe('SceneFlow', () => {
             // Mock resourcePreloader.preloadParallel
             jest.spyOn(resourcePreloader, 'preloadParallel').mockResolvedValue(undefined);
 
-            // Mock viewManager.clear
-            jest.spyOn(viewManager, 'clear').mockImplementation(() => {});
         });
 
         it('应该切换场景并更新当前场景', async () => {
@@ -133,22 +114,6 @@ describe('SceneFlow', () => {
             await sceneFlow.switchScene(SceneType.Battle, { preload: false });
 
             expect(preloadSpy).not.toHaveBeenCalled();
-        });
-
-        it('应该清理当前场景', async () => {
-            const clearSpy = jest.spyOn(viewManager, 'clear');
-
-            await sceneFlow.switchScene(SceneType.Battle, { cleanup: true });
-
-            expect(clearSpy).toHaveBeenCalled();
-        });
-
-        it('应该跳过清理如果选项设置为 false', async () => {
-            const clearSpy = jest.spyOn(viewManager, 'clear');
-
-            await sceneFlow.switchScene(SceneType.Battle, { cleanup: false });
-
-            expect(clearSpy).not.toHaveBeenCalled();
         });
 
         it('应该在场景切换完成时调用 onComplete 回调', async () => {
@@ -188,7 +153,7 @@ describe('SceneFlow', () => {
             const preloadSpy = jest.spyOn(resourcePreloader, 'preloadParallel').mockResolvedValue(undefined);
 
             // 使用有配置的场景（scene-boss 或 scene-shop）
-            await sceneFlow.preloadScene(SceneType.Boss);
+            await sceneFlow.switchScene(SceneType.Boss, { preload: true });
 
             // 如果场景有配置，应该调用 preloadParallel
             // 注意：scene-battle 可能没有配置，所以使用 scene-boss

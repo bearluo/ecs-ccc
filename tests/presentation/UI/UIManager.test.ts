@@ -8,6 +8,7 @@ import { EventBus } from '../../../assets/scripts/bridge/EventBus';
 import { LevelExperienceComponent } from '../../../assets/scripts/gameplay/components/LevelExperience';
 import { InventoryComponent } from '../../../assets/scripts/gameplay/components/Inventory';
 import { Component } from 'cc';
+import { ServiceLocator } from 'db://assets/scripts/app/ServiceLocator';
 
 describe('UIManager', () => {
     let uiManager: UIManager;
@@ -15,7 +16,9 @@ describe('UIManager', () => {
     let eventBus: EventBus;
 
     beforeEach(() => {
-        uiManager = UIManager.getInstance();
+        ServiceLocator.clear();
+        uiManager = new UIManager();
+        ServiceLocator.register(UIManager, uiManager);
         world = new World({ debug: false });
         eventBus = new EventBus();
         uiManager.setWorld(world);
@@ -28,8 +31,8 @@ describe('UIManager', () => {
 
     describe('单例模式', () => {
         it('应该返回同一个实例', () => {
-            const instance1 = UIManager.getInstance();
-            const instance2 = UIManager.getInstance();
+            const instance1 = ServiceLocator.require(UIManager);
+            const instance2 = ServiceLocator.require(UIManager);
             expect(instance1).toBe(instance2);
         });
     });
