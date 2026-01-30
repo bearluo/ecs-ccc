@@ -115,12 +115,15 @@ export class GameApp extends Component {
         
         // 初始化表现层驱动
         this.animDriver = new AnimDriver(this.eventBus);
+        ServiceLocator.register(AnimDriver, this.animDriver);
         this.viewManager.setAnimDriver(this.animDriver); // 设置 AnimDriver，用于播放动画
         
         this.fxDriver = new FxDriver(this.resourceManager, this.configLoader);
+        ServiceLocator.register(FxDriver, this.fxDriver);
         this.viewManager.setFxDriver(this.fxDriver); // 设置 FxDriver，用于播放特效
         
         this.audioDriver = new AudioDriver(this.resourceManager, this.configLoader);
+        ServiceLocator.register(AudioDriver, this.audioDriver);
         this.audioDriver.setViewParent(this.viewParent); // 设置视图父节点，初始化音频源
         this.viewManager.setAudioDriver(this.audioDriver); // 设置 AudioDriver，用于播放音效
 
